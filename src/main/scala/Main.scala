@@ -1,21 +1,26 @@
-import java.util.UUID
+class ParkingLot(slots: Int = 1) {
+  var cars: List[Car] = List()
 
-class ParkingLot(slots: Int = 4) {
-  var cars: List[(UUID, Car)] = List()
-
-  def park(car: Car) =
-    if (emptySlots > 0) {
-      val token = UUID.randomUUID()
-      cars = (token, car) :: cars
-      token
-    } else throw new Exception("There is no room.")
-
-  def withdraw(token: UUID) = cars.find(_._1 == token) match {
-    case Some((_, car)) => car
-    case None           => throw new Exception("No such car.")
+  def park(car: Car) = cars match {
+    case cs if !full => cars = car :: cs
+      Some()
+    case _           => None
   }
 
-  def emptySlots = slots - cars.length
+  def pick = cars match {
+    case c :: cs if cars.nonEmpty => cars = cs
+      Some(c)
+    case _                        => None
+  }
+
+  def full = cars.length == slots
+}
+
+class ParkingBoy(parkingLots: List[ParkingLot]) {
+  def park(car: Car) = parkingLots.find(lot => !lot.full) match {
+    case Some(lot) => lot.park(car)
+    case _         => None
+  }
 }
 
 class Car
