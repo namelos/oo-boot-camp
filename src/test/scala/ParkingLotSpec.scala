@@ -1,3 +1,7 @@
+import java.util.UUID
+import scalaz._
+import Scalaz._
+
 import org.scalatest.{FlatSpec, Matchers}
 
 class ParkingLotSpec extends FlatSpec with Matchers {
@@ -5,9 +9,7 @@ class ParkingLotSpec extends FlatSpec with Matchers {
     val parkingLot = new ParkingLot
     val car = new Car
 
-    parkingLot.park(car)
-
-    parkingLot.pick shouldBe Some(car)
+    parkingLot.park(car).flatMap(parkingLot.pick).foreach(_ shouldBe car)
   }
 
   it should "not park car when it is full" in {
@@ -15,15 +17,14 @@ class ParkingLotSpec extends FlatSpec with Matchers {
     val car = new Car
 
     parkingLot.park(new Car)
-    parkingLot.park(car)
 
-    parkingLot.pick should not be car
+    parkingLot.park(car) shouldBe None
   }
 
   it should "not pick car when it is empty" in {
     val parkingLot = new ParkingLot
 
-    parkingLot.pick shouldBe None
+    parkingLot.pick(UUID.randomUUID()) shouldBe None
   }
 }
 
@@ -33,9 +34,7 @@ class ParkingBoySpec extends FlatSpec with Matchers {
     val boy = new ParkingBoy(List(lot))
     val car = new Car
 
-    boy.park(car)
-
-    lot.pick shouldBe Some(car)
+    boy.park(car).flatMap(lot.pick).map(_ shouldBe car)
   }
 
   it should "park a car in the second lot when there are two lot " +
@@ -45,10 +44,8 @@ class ParkingBoySpec extends FlatSpec with Matchers {
     val boy = new ParkingBoy(List(lot1, lot2))
     val car = new Car
 
-    boy.park(new Car)
-    boy.park(car)
-
-    lot2.pick shouldBe Some(car)
+    boy park new Car
+    boy.park (car).>>= (lot2 pick).map (_ shouldBe car)
   }
 
   it should "not park car when all the parking lots are full" in {
@@ -59,8 +56,6 @@ class ParkingBoySpec extends FlatSpec with Matchers {
     val boy = new ParkingBoy(List(lot1, lot2))
     val car = new Car
 
-    boy.park(car)
-
-    lot2.pick should not be Some(car)
+    boy.park(car) shouldBe None
   }
 }
