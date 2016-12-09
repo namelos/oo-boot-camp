@@ -15,10 +15,16 @@ class ParkingLot(slots: Int = 1) {
 
   def pick(id: UUID) = cars find (_._1 == id) map (_._2)
 
-  def full= cars.length == slots
+  def full = cars.length == slots
+
+  def availableSlots = slots - cars.length
 }
 
 class ParkingBoy(parkingLots: List[ParkingLot]) {
+  def park(car: Car) = parkingLots find (!_.full) >>= (_.park(car))
+}
+
+class SmartParkingBoy(parkingLots: List[ParkingLot]) {
   def park(car: Car) = parkingLots find (!_.full) >>= (_.park(car))
 }
 
