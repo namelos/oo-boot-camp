@@ -31,7 +31,7 @@ class ParkingLotSpec extends FlatSpec with Matchers {
 class ParkingBoySpec extends FlatSpec with Matchers {
   "parking boy" should "park a car" in {
     val lot = new ParkingLot
-    val boy = new ParkingBoy(List(lot))
+    val boy = new ParkingBoy(lot)
     val car = new Car
 
     boy park car flatMap (lot pick) map (_ shouldBe car)
@@ -41,7 +41,7 @@ class ParkingBoySpec extends FlatSpec with Matchers {
     "and the first lot is full while the second is not full" in {
     val lot1 = new ParkingLot
     val lot2 = new ParkingLot
-    val boy = new ParkingBoy(List(lot1, lot2))
+    val boy = new ParkingBoy(lot1, lot2)
     val car = new Car
 
     boy park new Car
@@ -53,9 +53,21 @@ class ParkingBoySpec extends FlatSpec with Matchers {
     val lot2 = new ParkingLot
     lot1 park new Car
     lot2 park new Car
-    val boy = new ParkingBoy(List(lot1, lot2))
+    val boy = new ParkingBoy(lot1, lot2)
     val car = new Car
 
     boy park car shouldBe None
+  }
+}
+
+class SmartParkingBoySpec extends FlatSpec with Matchers {
+  "smart parking boy" should "park a car in the lot which has most empty slots" in {
+    val lotWith2EmptySlots = new ParkingLot(2)
+    val lotWith1EmptySlots = new ParkingLot(100)
+    1 to 99 foreach (_ => lotWith1EmptySlots.park(new Car))
+    val boy = new SmartParkingBoy(lotWith1EmptySlots, lotWith2EmptySlots)
+    val car = new Car
+
+    boy park car flatMap (lotWith2EmptySlots pick) map (_ shouldBe None)
   }
 }

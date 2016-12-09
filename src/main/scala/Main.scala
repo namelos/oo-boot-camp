@@ -20,12 +20,12 @@ class ParkingLot(slots: Int = 1) {
   def availableSlots = slots - cars.length
 }
 
-class ParkingBoy(parkingLots: List[ParkingLot]) {
-  def park(car: Car) = parkingLots find (!_.full) >>= (_.park(car))
+class ParkingBoy(parkingLots: ParkingLot*) {
+  def park(car: Car) = parkingLots find (!_.full) flatMap (_ park car)
 }
 
-class SmartParkingBoy(parkingLots: List[ParkingLot]) {
-  def park(car: Car) = parkingLots find (!_.full) >>= (_.park(car))
+class SmartParkingBoy(parkingLots: ParkingLot*) {
+  def park(car: Car) = parkingLots find (!_.full) flatMap (_ park car)
 }
 
 class Car
