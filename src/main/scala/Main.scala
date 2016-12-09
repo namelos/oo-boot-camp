@@ -13,7 +13,14 @@ class ParkingLot(slots: Int = 1) {
     case _           => none
   }
 
-  def pick(id: UUID) = cars find (_._1 == id) map (_._2)
+  def pick(id: UUID) = {
+    cars find (_._1 == id) match {
+      case Some((id, car)) =>
+        cars = cars filter {case (i, _) => i != id}
+        car some
+      case _ => none
+    }
+  }
 
   def full = cars.length == slots
 
@@ -21,11 +28,11 @@ class ParkingLot(slots: Int = 1) {
 }
 
 class ParkingBoy(parkingLots: ParkingLot*) {
-  def park(car: Car) = parkingLots find (!_.full) flatMap (_ park car)
+  def park(car: Car) = parkingLots find (_ park car isDefined) flatMap (_ park car)
 }
 
 class SmartParkingBoy(parkingLots: ParkingLot*) {
-  def park(car: Car) = parkingLots find (!_.full) flatMap (_ park car)
+  def park(car: Car) = (parkingLots sortBy (_ availableSlots) last) park car
 }
 
 class Car
