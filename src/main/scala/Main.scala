@@ -1,6 +1,4 @@
 import java.util.UUID
-import scalaz._
-import Scalaz._
 
 class ParkingLot(slots: Int = 1) {
   var cars: List[(UUID, Car)] = List()
