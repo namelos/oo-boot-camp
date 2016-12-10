@@ -6,7 +6,7 @@ class ParkingLot(slots: Int = 1) {
   var cars: List[(UUID, Car)] = List()
 
   def park(car: Car) = cars match {
-    case cs if !full =>
+    case cs if notFull =>
       val id = UUID.randomUUID()
       cars = (id, car) :: cs
       id some
@@ -22,13 +22,13 @@ class ParkingLot(slots: Int = 1) {
     }
   }
 
-  def full = cars.length == slots
+  def notFull = cars.length != slots
 
   def availableSlots = slots - cars.length
 }
 
 class ParkingBoy(parkingLots: ParkingLot*) {
-  def park(car: Car) = parkingLots find (_ park car isDefined) flatMap (_ park car)
+  def park(car: Car) = parkingLots find(_ notFull) flatMap(_ park car)
 }
 
 class SmartParkingBoy(parkingLots: ParkingLot*) {
