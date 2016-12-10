@@ -99,8 +99,9 @@ class SmartParkingBoySpec extends FlatSpec with Matchers {
 
     val token = boy park car
 
-    token flatMap(lotWith1Slot pick) shouldBe None
-    token flatMap(anotherLotWith1Slot pick) shouldBe Some(car)
+    val maybeCar1 = token flatMap(lotWith1Slot pick)
+    val maybeCar2 = token flatMap(anotherLotWith1Slot pick)
+    (maybeCar1 ++ maybeCar2).head shouldBe car
   }
 
   it should "not park car when parking lots are all full" in {
