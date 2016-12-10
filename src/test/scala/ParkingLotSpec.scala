@@ -51,6 +51,15 @@ class ParkingBoySpec extends FlatSpec with Matchers {
     token flatMap(lot pick) shouldBe Some(car)
   }
 
+  it should "picks car" in {
+    val car = new Car
+    val lotWithACar = new ParkingLot
+    val token = lotWithACar park car
+    val boy = new ParkingBoy(lotWithACar)
+
+    token flatMap (boy pick) shouldBe Some(car)
+  }
+
   it should "park a car in the second lot when there are two lot " +
     "and the first lot is full while the second is not full" in {
     val fullLot = new ParkingLot
@@ -89,6 +98,15 @@ class SmartParkingBoySpec extends FlatSpec with Matchers {
 
     val token = boy park car
     token flatMap(lotWith2EmptySlots pick) shouldBe Some(car)
+  }
+
+  it should "picks car" in {
+    val car = new Car
+    val lotWithACar = new ParkingLot
+    val token = lotWithACar park car
+    val boy = new SmartParkingBoy(lotWithACar)
+
+    token flatMap (boy pick) shouldBe Some(car)
   }
 
   it should "park either one of two lots when there are same empty slots" in {
