@@ -27,7 +27,11 @@ class ParkingLot(slots: Int = 1) {
   def availableSlots = slots - cars.length
 }
 
-class ParkingBoy(parkingLots: ParkingLot*) {
+class BaseParkingBoy(parkingLots: ParkingLot*) {
+
+}
+
+class ParkingBoy(parkingLots: ParkingLot*) extends BaseParkingBoy(parkingLots: _*) {
   def park(car: Car) = parkingLots find(_ notFull) flatMap(_ park car)
 }
 
