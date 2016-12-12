@@ -1,3 +1,5 @@
+import java.util.UUID
+
 import org.scalatest.{FlatSpec, Matchers}
 
 class ParkingBoySpec extends FlatSpec with Matchers {
@@ -18,6 +20,13 @@ class ParkingBoySpec extends FlatSpec with Matchers {
     val boy = new ParkingBoy(lotWithACar)
 
     token flatMap(boy pick) shouldBe Some(car)
+  }
+
+  it should "not pick a car does not exist" in {
+    val lot = new ParkingLot
+    val boy = new ParkingBoy(lot)
+
+    boy pick (UUID randomUUID) shouldBe None
   }
 
   it should "park a car in the second lot when there are two lot " +

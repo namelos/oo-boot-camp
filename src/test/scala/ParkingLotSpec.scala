@@ -31,7 +31,7 @@ class ParkingLotSpec extends FlatSpec with Matchers {
     token flatMap(lot pick) shouldBe None
   }
 
-  it should "not pick car when it is empty" in {
+  it should "not pick car does not exist" in {
     val lot = new ParkingLot
 
     lot pick(UUID randomUUID) shouldBe None
