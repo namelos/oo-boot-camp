@@ -4,14 +4,19 @@ import org.scalatest.{FlatSpec, Matchers}
 
 class SmartParkingBoySpec extends FlatSpec with Matchers {
   "smart parking boy" should "park a car in the lot which has most empty slots" in {
+    val lotWith3EmptySlots = new ParkingLot(3)
     val lotWith2EmptySlots = new ParkingLot(2)
-    val lotWith1EmptySlots = new ParkingLot(100)
-    1 to 99 foreach (_ => lotWith1EmptySlots park new Car)
-    val boy = new SmartParkingBoy(lotWith1EmptySlots, lotWith2EmptySlots)
+    val boy = new SmartParkingBoy(lotWith2EmptySlots, lotWith3EmptySlots)
     val car = new Car
+    val otherCar = new Car
 
     val token = boy park car
-    token flatMap(lotWith2EmptySlots pick) shouldBe Some(car)
+    lotWith3EmptySlots park new Car
+    lotWith3EmptySlots park new Car
+    val otherToken = boy park otherCar
+
+    token flatMap(lotWith3EmptySlots pick) shouldBe Some(car)
+    otherToken flatMap(lotWith2EmptySlots pick) shouldBe Some(otherCar)
   }
 
   it should "picks car" in {
