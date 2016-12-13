@@ -8,7 +8,7 @@ class ParkingLot(slots: Int = 1) {
       val id = UUID.randomUUID()
       cars = (id, car) :: cs
       Some(id)
-    case _           => None
+    case _             => None
   }
 
   def pick(id: UUID) = {
@@ -16,7 +16,7 @@ class ParkingLot(slots: Int = 1) {
       case Some((id, car)) =>
         cars = cars filter {case (i, _) => i != id}
         Some(car)
-      case _ => None
+      case _               => None
     }
   }
 
@@ -30,7 +30,7 @@ class BaseParkingBoy(parkingLots: ParkingLot*) {
 }
 
 class ParkingBoy(parkingLots: ParkingLot*) extends BaseParkingBoy(parkingLots: _*) {
-  def park(car: Car) = parkingLots find(_ notFull) flatMap(_ park car)
+  def park(car: Car) = parkingLots find(_ notFull) flatMap (_ park car)
 }
 
 class SmartParkingBoy(parkingLots: ParkingLot*) extends BaseParkingBoy(parkingLots: _*) {
