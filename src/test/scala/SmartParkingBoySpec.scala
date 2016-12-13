@@ -6,7 +6,7 @@ class SmartParkingBoySpec extends FlatSpec with Matchers {
   "smart parking boy" should "park a car in the lot which has most empty slots" in {
     val lotWith2EmptySlots = new ParkingLot(2)
     val lotWith1EmptySlots = new ParkingLot(100)
-    1 to 99 foreach (_ => lotWith1EmptySlots.park(new Car))
+    1 to 99 foreach (_ => lotWith1EmptySlots park new Car)
     val boy = new SmartParkingBoy(lotWith1EmptySlots, lotWith2EmptySlots)
     val car = new Car
 
