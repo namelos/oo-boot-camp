@@ -3,11 +3,15 @@ import java.util.UUID
 import org.scalatest.{FlatSpec, Matchers}
 
 class SuperParkingBoySpec extends FlatSpec with Matchers {
+  def givenLot(slots: Int, cars: Int) = {
+    val lot = new ParkingLot(slots)
+    0 to cars foreach(_ => lot park new Car)
+    lot
+  }
+
   "super parking boy" should "park a car in the lot which has highest empty rate" in {
-    val lotWith2SlotsAnd1Car = new ParkingLot(2)
-    lotWith2SlotsAnd1Car park new Car
-    val lotWith3SlotsAnd1Car = new ParkingLot(3)
-    lotWith3SlotsAnd1Car park new Car
+    val lotWith2SlotsAnd1Car = givenLot(2, 1)
+    val lotWith3SlotsAnd1Car = givenLot(3, 1)
 
     val boy = new SuperParkingBoy(lotWith2SlotsAnd1Car, lotWith3SlotsAnd1Car)
     val car = new Car
