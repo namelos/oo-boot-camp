@@ -23,18 +23,24 @@ class ParkingLot(slots: Int = 1) {
   def notFull = cars.length != slots
 
   def availableSlots = slots - cars.length
+
+  def emptyRate = availableSlots.toDouble / slots.toDouble
 }
 
 class BaseParkingBoy(parkingLots: ParkingLot*) {
-  def pick(id: UUID) = parkingLots flatMap (_ pick id) headOption
+  def pick(id: UUID) = parkingLots flatMap(_ pick id) headOption
 }
 
 class ParkingBoy(parkingLots: ParkingLot*) extends BaseParkingBoy(parkingLots: _*) {
-  def park(car: Car) = parkingLots find(_ notFull) flatMap (_ park car)
+  def park(car: Car) = parkingLots find(_ notFull) flatMap(_ park car)
 }
 
 class SmartParkingBoy(parkingLots: ParkingLot*) extends BaseParkingBoy(parkingLots: _*) {
-  def park(car: Car) = (parkingLots sortBy (_ availableSlots) last) park car
+  def park(car: Car) = (parkingLots sortBy(_ availableSlots) last) park car
+}
+
+class SuperParkingBoy(parkingLots: ParkingLot*) extends BaseParkingBoy(parkingLots: _*) {
+  def park(car: Car) = (parkingLots sortBy(_ emptyRate) last) park car
 }
 
 class Car
