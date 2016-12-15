@@ -1,4 +1,5 @@
 import java.util.UUID
+import scalaz._
 
 class ParkingLot(slots: Int = 1) {
   var cars: List[(UUID, Car)] = List()
@@ -27,20 +28,22 @@ class ParkingLot(slots: Int = 1) {
   def emptyRate = availableSlots.toDouble / slots.toDouble
 }
 
-class BaseParkingBoy(parkingLots: ParkingLot*) {
+trait Pickable {
+  val parkingLots: Seq[ParkingLot]
+
   def pick(id: UUID) = parkingLots flatMap(_ pick id) headOption
 }
 
-class ParkingBoy(parkingLots: ParkingLot*) extends BaseParkingBoy(parkingLots: _*) {
-  def park(car: Car) = parkingLots find(_ notFull) flatMap(_ park car)
+class ParkingBoy(val parkingLots: ParkingLot*) extends Pickable {
+  def park(car: Car) = parkingLots find(_ notFull) flatMap (_ park car)
 }
 
-class SmartParkingBoy(parkingLots: ParkingLot*) extends BaseParkingBoy(parkingLots: _*) {
-  def park(car: Car) = (parkingLots sortBy(_ availableSlots) last) park car
+class SmartParkingBoy(val parkingLots: ParkingLot*) extends Pickable {
+  def park(car: Car) = (parkingLots sortBy (_ availableSlots) last) park car
 }
 
-class SuperParkingBoy(parkingLots: ParkingLot*) extends BaseParkingBoy(parkingLots: _*) {
-  def park(car: Car) = (parkingLots sortBy(_ emptyRate) last) park car
+class SuperParkingBoy(val parkingLots: ParkingLot*) extends Pickable {
+  def park(car: Car) = (parkingLots sortBy (_ emptyRate) last) park car
 }
 
 class Car
