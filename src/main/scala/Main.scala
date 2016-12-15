@@ -34,21 +34,21 @@ trait Pickable {
   def pick(id: UUID) = parkingLots flatMap(_ pick id) headOption
 }
 
-trait Boy {
+trait Parkable {
   def findLot(car: Car): Option[ParkingLot]
 
   def park(car: Car) = findLot(car) flatMap (_ park car)
 }
 
-class ParkingBoy(val parkingLots: ParkingLot*) extends Pickable with Boy {
+class ParkingBoy(val parkingLots: ParkingLot*) extends Pickable with Parkable {
   def findLot(car: Car) = parkingLots find(_ notFull)
 }
 
-class SmartParkingBoy(val parkingLots: ParkingLot*) extends Pickable with Boy {
+class SmartParkingBoy(val parkingLots: ParkingLot*) extends Pickable with Parkable {
   def findLot(car: Car) = Some(parkingLots sortBy (_ availableSlots) last)
 }
 
-class SuperParkingBoy(val parkingLots: ParkingLot*) extends Pickable with Boy {
+class SuperParkingBoy(val parkingLots: ParkingLot*) extends Pickable with Parkable {
   def findLot(car: Car) = Some(parkingLots sortBy (_ emptyRate) last)
 }
 
