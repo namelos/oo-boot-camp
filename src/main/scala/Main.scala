@@ -1,10 +1,19 @@
 import java.util.UUID
 import scalaz._
 
-class ParkingLot(slots: Int = 1) {
+trait Pickable {
+  def pick(id: UUID): Option[Car]
+}
+
+trait Parkable {
+  def findLot: Option[ParkingLot]
+  def park(car: Car): Option[UUID] = findLot flatMap (_ park car)
+}
+
+class ParkingLot(slots: Int = 1) extends Pickable with Parkable {
   var cars: List[(UUID, Car)] = List()
 
-  def park(car: Car): Option[UUID] = cars match {
+  override def park(car: Car): Option[UUID] = cars match {
     case cs if notFull =>
       val id = UUID.randomUUID()
       cars = (id, car) :: cs
@@ -22,19 +31,9 @@ class ParkingLot(slots: Int = 1) {
   }
 
   def notFull: Boolean = cars.length != slots
-
   def availableSlots: Int = slots - cars.length
-
   def emptyRate: Double = availableSlots.toDouble / slots.toDouble
-}
-
-trait Pickable {
-  def pick(id: UUID): Option[Car]
-}
-
-trait Parkable {
-  def findLot: Option[ParkingLot]
-  def park(car: Car) = findLot flatMap (_ park car)
+  def findLot: Option[ParkingLot] = Some(this)
 }
 
 class ParkingBoy(val parkingLots: ParkingLot*) extends Pickable with Parkable {
