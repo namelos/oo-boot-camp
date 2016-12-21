@@ -2,18 +2,22 @@ import java.util.UUID
 import scalaz._
 
 trait Pickable {
-  def pick(id: UUID): Option[Car]
+  val pickParkable: Seq[Pickable]
+  def pick(id: UUID): Option[Car] = pickParkable flatMap(_ pick id) headOption
 }
 
 trait Parkable {
-  def park(car: Car): Option[UUID]
-  def canPark: Boolean
+  val pickParkable: Seq[Parkable]
+  def park(car: Car): Option[UUID] = pickParkable find(_ canPark) flatMap(_ park car)
+  def canPark: Boolean = pickParkable.exists(_ canPark)
 }
 
 class ParkingLot(slots: Int = 1) extends Pickable with Parkable {
+  val pickParkable = Seq(this)
+
   var cars: List[(UUID, Car)] = List()
 
-  def park(car: Car): Option[UUID] = cars match {
+  override def park(car: Car): Option[UUID] = cars match {
     case cs if canPark =>
       val id = UUID.randomUUID()
       cars = (id, car) :: cs
@@ -21,7 +25,7 @@ class ParkingLot(slots: Int = 1) extends Pickable with Parkable {
     case _             => None
   }
 
-  def pick(id: UUID): Option[Car] = {
+  override def pick(id: UUID): Option[Car] = {
     cars find (_._1 == id) match {
       case Some((id, car)) =>
         cars = cars filter {case (i, _) => i != id}
@@ -30,33 +34,21 @@ class ParkingLot(slots: Int = 1) extends Pickable with Parkable {
     }
   }
 
-  def canPark: Boolean = cars.length != slots
+  override def canPark: Boolean = cars.length != slots
   def availableSlots: Int = slots - cars.length
   def emptyRate: Double = availableSlots.toDouble / slots.toDouble
-  def findLot(car: Car): Option[ParkingLot] = Some(this)
 }
 
-class ParkingBoy(val parkingLots: ParkingLot*) extends Pickable with Parkable {
-  def park(car: Car): Option[UUID] = parkingLots find(_ canPark) flatMap(_ park car)
-  def pick(id: UUID): Option[Car] = parkingLots flatMap(_ pick id) headOption
-  def canPark: Boolean = parkingLots.exists(_ canPark)
+class ParkingBoy(val pickParkable: ParkingLot*) extends Pickable with Parkable
+
+class SmartParkingBoy(val pickParkable: ParkingLot*) extends Pickable with Parkable {
+  override def park(car: Car): Option[UUID] = (pickParkable sortBy (_ availableSlots) lastOption) flatMap(_ park car)
 }
 
-class SmartParkingBoy(val parkingLots: ParkingLot*) extends Pickable with Parkable {
-  def park(car: Car): Option[UUID] = (parkingLots sortBy (_ availableSlots) lastOption) flatMap(_ park car)
-  def pick(id: UUID): Option[Car] = parkingLots flatMap(_ pick id) headOption
-  def canPark: Boolean = parkingLots.exists(_ canPark)
+class SuperParkingBoy(val pickParkable: ParkingLot*) extends Pickable with Parkable {
+  override def park(car: Car): Option[UUID] = (pickParkable sortBy (_ emptyRate) lastOption) flatMap(_ park car)
 }
 
-class SuperParkingBoy(val parkingLots: ParkingLot*) extends Pickable with Parkable {
-  def park(car: Car): Option[UUID] = (parkingLots sortBy (_ emptyRate) lastOption) flatMap(_ park car)
-  def pick(id: UUID): Option[Car] = parkingLots flatMap(_ pick id) headOption
-  def canPark = parkingLots.exists(_ canPark)
-}
-
-class Manager[T <: Pickable with Parkable](val pickParkables: T*) {
-  def park(car: Car): Option[UUID] = pickParkables.find(_ canPark) flatMap(_ park car)
-  def pick(id: UUID): Option[Car] = pickParkables flatMap(_ pick id) headOption
-}
+class Manager[T <: Pickable with Parkable](val pickParkable: T*) extends Pickable with Parkable
 
 class Car
