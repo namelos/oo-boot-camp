@@ -6,16 +6,13 @@ trait Pickable {
 }
 
 trait Parkable {
-  def findLot: Option[ParkingLot]
-  def park(car: Car): Option[UUID] = findLot flatMap (_ park car)
+  def park(car: Car): Option[UUID]
 }
-
-trait PickParkable extends Pickable with Parkable
 
 class ParkingLot(slots: Int = 1) extends Pickable with Parkable {
   var cars: List[(UUID, Car)] = List()
 
-  override def park(car: Car): Option[UUID] = cars match {
+  def park(car: Car): Option[UUID] = cars match {
     case cs if notFull =>
       val id = UUID.randomUUID()
       cars = (id, car) :: cs
@@ -35,21 +32,21 @@ class ParkingLot(slots: Int = 1) extends Pickable with Parkable {
   def notFull: Boolean = cars.length != slots
   def availableSlots: Int = slots - cars.length
   def emptyRate: Double = availableSlots.toDouble / slots.toDouble
-  def findLot: Option[ParkingLot] = Some(this)
+  def findLot(car: Car): Option[ParkingLot] = Some(this)
 }
 
-class ParkingBoy(val parkingLots: ParkingLot*) extends PickParkable {
-  def findLot: Option[ParkingLot] = parkingLots find(_ notFull)
+class ParkingBoy(val parkingLots: ParkingLot*) extends Pickable with Parkable {
+  def park(car: Car): Option[UUID] = parkingLots find(_ notFull) flatMap(_ park car)
   def pick(id: UUID): Option[Car] = parkingLots flatMap(_ pick id) headOption
 }
 
-class SmartParkingBoy(val parkingLots: ParkingLot*) extends PickParkable {
-  def findLot: Option[ParkingLot] = Some(parkingLots sortBy (_ availableSlots) last)
+class SmartParkingBoy(val parkingLots: ParkingLot*) extends Pickable with Parkable {
+  def park(car: Car): Option[UUID] = (parkingLots sortBy (_ availableSlots) lastOption) flatMap(_ park car)
   def pick(id: UUID): Option[Car] = parkingLots flatMap(_ pick id) headOption
 }
 
-class SuperParkingBoy(val parkingLots: ParkingLot*) extends PickParkable {
-  def findLot: Option[ParkingLot] = Some(parkingLots sortBy (_ emptyRate) last)
+class SuperParkingBoy(val parkingLots: ParkingLot*) extends Pickable with Parkable {
+  def park(car: Car): Option[UUID] = (parkingLots sortBy (_ emptyRate) lastOption) flatMap(_ park car)
   def pick(id: UUID): Option[Car] = parkingLots flatMap(_ pick id) headOption
 }
 
