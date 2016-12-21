@@ -4,7 +4,7 @@ import scalaz._
 class ParkingLot(slots: Int = 1) {
   var cars: List[(UUID, Car)] = List()
 
-  def park(car: Car) = cars match {
+  def park(car: Car): Option[UUID] = cars match {
     case cs if notFull =>
       val id = UUID.randomUUID()
       cars = (id, car) :: cs
@@ -12,7 +12,7 @@ class ParkingLot(slots: Int = 1) {
     case _             => None
   }
 
-  def pick(id: UUID) = {
+  def pick(id: UUID): Option[Car] = {
     cars find (_._1 == id) match {
       case Some((id, car)) =>
         cars = cars filter {case (i, _) => i != id}
@@ -21,17 +21,15 @@ class ParkingLot(slots: Int = 1) {
     }
   }
 
-  def notFull = cars.length != slots
+  def notFull: Boolean = cars.length != slots
 
-  def availableSlots = slots - cars.length
+  def availableSlots: Int = slots - cars.length
 
-  def emptyRate = availableSlots.toDouble / slots.toDouble
+  def emptyRate: Double = availableSlots.toDouble / slots.toDouble
 }
 
 trait Pickable {
-  val parkingLots: Seq[ParkingLot]
-
-  def pick(id: UUID) = parkingLots flatMap(_ pick id) headOption
+  def pick(id: UUID): Option[Car]
 }
 
 trait Parkable {
@@ -41,15 +39,18 @@ trait Parkable {
 }
 
 class ParkingBoy(val parkingLots: ParkingLot*) extends Pickable with Parkable {
-  def findLot(car: Car) = parkingLots find(_ notFull)
+  def findLot(car: Car): Option[ParkingLot] = parkingLots find(_ notFull)
+  def pick(id: UUID): Option[Car] = parkingLots flatMap(_ pick id) headOption
 }
 
 class SmartParkingBoy(val parkingLots: ParkingLot*) extends Pickable with Parkable {
-  def findLot(car: Car) = Some(parkingLots sortBy (_ availableSlots) last)
+  def findLot(car: Car): Option[ParkingLot] = Some(parkingLots sortBy (_ availableSlots) last)
+  def pick(id: UUID): Option[Car] = parkingLots flatMap(_ pick id) headOption
 }
 
 class SuperParkingBoy(val parkingLots: ParkingLot*) extends Pickable with Parkable {
-  def findLot(car: Car) = Some(parkingLots sortBy (_ emptyRate) last)
+  def findLot(car: Car): Option[ParkingLot] = Some(parkingLots sortBy (_ emptyRate) last)
+  def pick(id: UUID): Option[Car] = parkingLots flatMap(_ pick id) headOption
 }
 
 class Car
