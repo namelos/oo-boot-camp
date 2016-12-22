@@ -14,13 +14,16 @@ trait Parkable {
 
 trait Reportable {
   val pickParkable: Seq[Reportable]
-
+  val position: String
   def slotsAmount: Int = pickParkable.map(_.slotsAmount).sum
   def carsAmount: Int = pickParkable.map(_.carsAmount).sum
+  def report(indentation: String = ""): String = s"$indentation$position $carsAmount $slotsAmount" +
+    pickParkable.map(_ report(indentation + "  ")).mkString("\n", "", "")
+}
 
-//  def slotsAmount: Int
-//  def carsAmount: Int
-  def report: String
+trait Boy extends Pickable with Parkable with Reportable {
+  val position = "b"
+  val pickParkable: Seq[ParkingLot]
 }
 
 class ParkingLot(slots: Int = 1) extends Pickable with Parkable with Reportable {
@@ -50,33 +53,23 @@ class ParkingLot(slots: Int = 1) extends Pickable with Parkable with Reportable 
   def emptyRate: Double = availableSlots.toDouble / slots.toDouble
   override def carsAmount = cars.length
   override def slotsAmount = slots
-  override def report = {
-    val result = s"p $carsAmount $slotsAmount\n"
-    println(result)
-    result
-  }
+  val position = "p"
+  override def report(indentaion: String) = s"${indentaion}p $carsAmount $slotsAmount\n"
 }
 
-class ParkingBoy(val pickParkable: ParkingLot*) extends Pickable with Parkable with Reportable {
-  def report: String = s"b $carsAmount $slotsAmount" + pickParkable.map(_ report).mkString("\n    ", "", "")
+class ParkingBoy(val pickParkable: ParkingLot*) extends Boy {
 }
 
-class SmartParkingBoy(val pickParkable: ParkingLot*) extends Pickable with Parkable with Reportable {
+class SmartParkingBoy(val pickParkable: ParkingLot*) extends Boy {
   override def park(car: Car): Option[UUID] = (pickParkable sortBy (_ availableSlots) lastOption) flatMap(_ park car)
-  def report: String = s"b $carsAmount $slotsAmount" + pickParkable.map(_ report).mkString("\n    ", "", "")
 }
 
-class SuperParkingBoy(val pickParkable: ParkingLot*) extends Pickable with Parkable with Reportable {
+class SuperParkingBoy(val pickParkable: ParkingLot*) extends Boy {
   override def park(car: Car): Option[UUID] = (pickParkable sortBy (_ emptyRate) lastOption) flatMap(_ park car)
-  def report: String = s"b $carsAmount $slotsAmount" + pickParkable.map(_ report).mkString("\n    ", "", "")
 }
 
 class Manager[T <: Pickable with Parkable with Reportable](val pickParkable: T*) extends Pickable with Parkable with Reportable {
-  def report: String = {
-    val result = s"m $carsAmount $slotsAmount" + pickParkable.map(_ report).mkString("\n  ", "  ", "")
-    println(result)
-    result
-  }
+  val position = "m"
 }
 
 class Car
